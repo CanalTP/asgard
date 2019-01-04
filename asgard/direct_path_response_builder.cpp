@@ -109,8 +109,8 @@ void compute_metadata(pbnavitia::Journey& pb_journey) {
     durations->set_ridesharing(total_ridesharing_duration);
     durations->set_total(ts_arrival - ts_departure);
 
-    int i = 0;
-    i++;
+        int i = 0;
+        i++;
 
     auto* distances = pb_journey.mutable_distances();
     distances->set_walking(total_walking_distance);
