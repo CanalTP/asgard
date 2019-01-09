@@ -42,6 +42,8 @@ pbnavitia::Response build_journey_response(const pbnavitia::Request& request,
     journey->set_requested_date_time(departure_posix_time);
     journey->set_departure_date_time(departure_posix_time);
     journey->set_arrival_date_time(arrival_posix_time);
+            int i =0;
+    i++;
 
     // Section
     auto* s = journey->add_sections();
