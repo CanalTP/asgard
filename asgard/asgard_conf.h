@@ -9,12 +9,14 @@
 namespace asgard {
 
 template<typename T>
-const T get_config(const std::string& key, T value = T()) {
+const T get_config(const std::string& key, T value = T(), bool log = true) {
     char* v = std::getenv(key.c_str());
     if (v != nullptr) {
         value = boost::lexical_cast<T>(v);
     }
-    LOG_INFO("Config: " + key + "=" + boost::lexical_cast<std::string>(value));
+    if (log) {
+        LOG_INFO("Config: " + key + "=" + boost::lexical_cast<std::string>(value));
+    }
     return value;
 }
 
@@ -29,6 +31,12 @@ struct AsgardConf {
     unsigned int radius;
 
     AsgardConf() {
+        // We don't want to log that, otherwise it will initilize the logs by default with std_out
+        const auto logging_file_path = get_config<std::string>("ASGARD_LOGGING_FILE_PATH", "", false);
+        if (!logging_file_path.empty()) {
+            valhalla::midgard::logging::Configure({{"type", "file"}, {"file_name", logging_file_path}, {"reopen_interval", "1"}});
+        }
+
         socket_path = get_config<std::string>("ASGARD_SOCKET_PATH", "tcp://*:6000");
         cache_size = get_config<size_t>("ASGARD_CACHE_SIZE", 100000);
         nb_threads = get_config<size_t>("ASGARD_NB_THREADS", 3);
