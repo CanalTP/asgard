@@ -45,6 +45,10 @@ using ProjectedLocations = std::unordered_map<midgard::PointLL, valhalla::baldr:
 constexpr size_t MAX_MASK_SIZE = 10000;
 using ProjectionFailedMask = std::bitset<MAX_MASK_SIZE>;
 
+constexpr float WALKING_MAX_MATRIX_COST_FACTOR = 1.;
+constexpr float BIKE_MAX_MATRIX_COST_FACTOR = 2;
+constexpr float CAR_MAX_MATRIX_COST_FACTOR = 2;
+
 namespace {
 
 pbnavitia::Response make_error_response(pbnavitia::Error_error_id err_id, const std::string& err_msg) {
@@ -59,12 +63,12 @@ pbnavitia::Response make_error_response(pbnavitia::Error_error_id err_id, const 
 float get_distance(const std::string& mode, float duration) {
     using namespace thor;
     if (mode == "walking") {
-        return duration * kTimeDistCostThresholdPedestrianDivisor;
+        return duration * kTimeDistCostThresholdPedestrianDivisor * WALKING_MAX_MATRIX_COST_FACTOR;
     }
     if (mode == "bike" || mode == "bss") {
-        return duration * kTimeDistCostThresholdBicycleDivisor;
+        return duration * kTimeDistCostThresholdBicycleDivisor * BIKE_MAX_MATRIX_COST_FACTOR;
     }
-    return duration * kTimeDistCostThresholdAutoDivisor;
+    return duration * kTimeDistCostThresholdAutoDivisor * CAR_MAX_MATRIX_COST_FACTOR;
 }
 
 ModeCostingArgs
