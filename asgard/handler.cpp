@@ -117,7 +117,6 @@ make_modecosting_args(const pbnavitia::StreetNetworkRoutingMatrixRequest& reques
     args.mode = request.mode();
 
     if (request.has_streetnetwork_params()) {
-        std::cout << "hello????????" << std::endl;
         auto const& request_params = request.streetnetwork_params();
 
         args.speeds[util::convert_navitia_to_valhalla_costing("walking")] = request_params.walking_speed();
