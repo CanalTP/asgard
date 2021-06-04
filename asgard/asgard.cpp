@@ -91,7 +91,9 @@ int main() {
     LoadBalancer lb(context);
     lb.bind(asgard_conf.socket_path, "inproc://workers");
     const asgard::Metrics metrics(asgard_conf);
-    const asgard::Projector projector(asgard_conf.cache_size,
+    const asgard::Projector projector(asgard_conf.cache_size["walking"],
+                                      asgard_conf.cache_size["bike"],
+                                      asgard_conf.cache_size["car"],
                                       asgard_conf.reachability,
                                       asgard_conf.radius);
     valhalla::baldr::GraphReader graph(asgard_conf.valhalla_conf.get_child("mjolnir"));

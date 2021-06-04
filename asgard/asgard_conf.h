@@ -36,7 +36,7 @@ namespace asgard {
 namespace ptree = boost::property_tree;
 struct AsgardConf {
     std::string socket_path;
-    std::size_t cache_size;
+    std::unordered_map<std::string, std::size_t> cache_size;
     std::size_t nb_threads;
     ptree::ptree valhalla_conf;
     boost::optional<std::string> metrics_binding;
@@ -46,7 +46,9 @@ struct AsgardConf {
     AsgardConf() {
         configure_logs("ASGARD_LOGGING_FILE_PATH");
         socket_path = get_config<std::string>("ASGARD_SOCKET_PATH", "tcp://*:6000");
-        cache_size = get_config<size_t>("ASGARD_CACHE_SIZE", 1000000);
+        cache_size["walking"] = get_config<size_t>("ASGARD_WALKING_CACHE_SIZE", 1000000);
+        cache_size["bike"] = get_config<size_t>("ASGARD_BIKE_CACHE_SIZE", 1000000);
+        cache_size["car"] = get_config<size_t>("ASGARD_CAR_CACHE_SIZE", 1000000);
         nb_threads = get_config<size_t>("ASGARD_NB_THREADS", 3);
         metrics_binding = get_config<std::string>("ASGARD_METRICS_BINDING", std::string("0.0.0.0:8080"));
 
