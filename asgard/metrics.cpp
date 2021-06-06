@@ -106,24 +106,24 @@ Metrics::Metrics(const boost::optional<const AsgardConf&>& config) {
         this->handle_matrix_histogram[mode] = &histo_matrix;
     }
 
-    for(auto const& mode : {"walking", "bike", "car"}){
+    for (auto const& mode : {"walking", "bike", "car"}) {
         nb_cache_miss_gauge[mode] = &prometheus::BuildGauge()
-                                       .Name(std::string("nb_cache_miss_") + mode)
-                                       .Help(std::string("Nb of projector's cache[") + mode + std::string("] miss from the start of app"))
-                                       .Register(*registry)
-                                       .Add({});
+                                         .Name(std::string("nb_cache_miss_") + mode)
+                                         .Help(std::string("Nb of projector's cache[") + mode + std::string("] miss from the start of app"))
+                                         .Register(*registry)
+                                         .Add({});
 
         nb_cache_call_gauge[mode] = &prometheus::BuildGauge()
-                                       .Name(std::string("nb_cache_calls_") + mode)
-                                       .Help(std::string("Nb of projector's cache[") + mode + std::string("] calls from the start of app"))
-                                       .Register(*registry)
-                                       .Add({});
+                                         .Name(std::string("nb_cache_calls_") + mode)
+                                         .Help(std::string("Nb of projector's cache[") + mode + std::string("] calls from the start of app"))
+                                         .Register(*registry)
+                                         .Add({});
 
         current_cache_size[mode] = &prometheus::BuildGauge()
-                                      .Name(std::string("cache_size_") + mode)
-                                      .Help(std::string("current cache[") + mode + std::string("]size"))
-                                      .Register(*registry)
-                                      .Add({});
+                                        .Name(std::string("cache_size_") + mode)
+                                        .Help(std::string("current cache[") + mode + std::string("]size"))
+                                        .Register(*registry)
+                                        .Add({});
     }
 }
 

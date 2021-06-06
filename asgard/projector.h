@@ -38,11 +38,11 @@ private:
     // the cache, mutable because side effect are not visible from the
     // exterior because of the purity of f
     mutable std::unordered_map<std::string, Cache> cache_{
-        {"walking", Cache()},{"bike", Cache()},{"car", Cache()}};
+        {"walking", Cache()}, {"bike", Cache()}, {"car", Cache()}};
     mutable std::unordered_map<std::string, size_t> nb_cache_miss_{
-        {"walking", 0},{"bike", 0},{"car", 0}};
+        {"walking", 0}, {"bike", 0}, {"car", 0}};
     mutable std::unordered_map<std::string, size_t> nb_cache_calls_{
-        {"walking", 0},{"bike", 0},{"car", 0}};
+        {"walking", 0}, {"bike", 0}, {"car", 0}};
     mutable std::mutex mutex;
 
     valhalla::baldr::Location build_location(const valhalla::midgard::PointLL& place,
@@ -63,10 +63,9 @@ public:
                        size_t cache_size_car = 1000,
                        unsigned int min_outbound_reach = 0,
                        unsigned int min_inbound_reach = 0,
-                       unsigned int radius = 0) : cache_size_({
-                                                  {"walking", cache_size_walking},
-                                                  {"bike", cache_size_walking},
-                                                  {"car", cache_size_walking}}),
+                       unsigned int radius = 0) : cache_size_({{"walking", cache_size_walking},
+                                                               {"bike", cache_size_walking},
+                                                               {"car", cache_size_walking}}),
                                                   min_outbound_reach(min_outbound_reach),
                                                   min_inbound_reach(min_inbound_reach),
                                                   radius(radius) {}

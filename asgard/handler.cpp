@@ -285,7 +285,7 @@ pbnavitia::Response Handler::handle_matrix(const pbnavitia::Request& request) {
 
     const auto duration = pt::microsec_clock::universal_time() - start;
     metrics.observe_handle_matrix(mode, duration.total_milliseconds() / 1000.0);
-    for(auto const& mode : {"walking", "bike", "car"}){
+    for (auto const& mode : {"walking", "bike", "car"}) {
         metrics.observe_nb_cache_miss(mode, projector.get_nb_cache_miss(mode), projector.get_nb_cache_calls(mode));
         metrics.observe_cache_size(mode, projector.get_current_cache_size(mode));
     }
