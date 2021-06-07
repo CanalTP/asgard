@@ -58,7 +58,7 @@ static const std::unordered_map<std::string, float> MAX_MATRIX_DISTANCE = {{"wal
                                                                            {"taxi", 500000}};
 
 // Default value set by Navitia
-// in m/s 
+// in m/s
 static const std::unordered_map<std::string, float> MAX_SPEED = {{"walking", 4},
                                                                  {"bike", 15},
                                                                  {"car", 50},
@@ -76,6 +76,9 @@ pbnavitia::Response make_error_response(pbnavitia::Error_error_id err_id, const 
 }
 
 float get_distance(const std::string& mode, float duration) {
+    if (duration < 0) {
+        throw std::runtime_error("Matrix max duration is negative");
+    }
     float max_distance = duration * TIMECOST_DIVISOR.at(mode);
     if (max_distance > MAX_MATRIX_DISTANCE.at(mode)) {
         LOG_ERROR(std::string("Matrix distance for mode ") + mode + " is too large, we have to clamp it");
