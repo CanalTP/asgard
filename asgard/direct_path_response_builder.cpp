@@ -74,15 +74,15 @@ void make_bss_streetnetwork_section(pbnavitia::Journey& journey,
     sn->set_length(section_length);
 
     auto shape_begin_idx = begin_maneuver->begin_shape_index();
-    set_extremity_pt_object(*(shape.begin() + shape_begin_idx), section->mutable_origin());
+    set_extremity_pt_object(*(shape.begin() + shape_begin_idx), *begin_maneuver, section->mutable_origin());
 
     size_t shape_end_idx;
     if (end_maneuver == directions_leg.maneuver().end()) {
         shape_end_idx = shape.size();
-        set_extremity_pt_object(shape.back(), section->mutable_destination());
+        set_extremity_pt_object(shape.back(), *(end_maneuver - 1), section->mutable_destination());
     } else {
         shape_end_idx = end_maneuver->begin_shape_index() + 1;
-        set_extremity_pt_object(*(shape.begin() + shape_end_idx - 1), section->mutable_destination());
+        set_extremity_pt_object(*(shape.begin() + shape_end_idx - 1), *end_maneuver, section->mutable_destination());
     }
 
     compute_geojson({shape.begin() + shape_begin_idx,
@@ -117,8 +117,8 @@ void _make_bss_maneuver_section(pbnavitia::Journey& journey,
     section->set_begin_date_time(begin_date_time);
     section->set_end_date_time(begin_date_time + section_duration);
 
-    set_extremity_pt_object(*(shape.begin() + shape_idx), section->mutable_origin());
-    set_extremity_pt_object(*(shape.begin() + shape_idx), section->mutable_destination());
+    set_extremity_pt_object(*(shape.begin() + shape_idx), *bss_maneuver, section->mutable_origin());
+    set_extremity_pt_object(*(shape.begin() + shape_idx), *bss_maneuver, section->mutable_destination());
 
     compute_geojson({*(shape.begin() + shape_idx)}, *section);
 
@@ -202,8 +202,8 @@ void build_mono_modal_journey(pbnavitia::Journey& journey,
         0.f,
         [&](float sum, const auto& m) { return sum + m.length() * KM_TO_M; });
 
-    set_extremity_pt_object(shape.front(), section->mutable_origin());
-    set_extremity_pt_object(shape.back(), section->mutable_destination());
+    set_extremity_pt_object(shape.front(), *begin_maneuver, section->mutable_origin());
+    set_extremity_pt_object(shape.back(), *(end_maneuver - 1), section->mutable_destination());
 
     section->set_duration(section_duration);
     sn->set_duration(section_duration);
@@ -408,15 +408,25 @@ pbnavitia::Response build_journey_response(const pbnavitia::Request& request,
     return response;
 }
 
-void set_extremity_pt_object(const valhalla::midgard::PointLL& geo_point, pbnavitia::PtObject* o) {
+void set_extremity_pt_object(const valhalla::midgard::PointLL& geo_point, const valhalla::DirectionsLeg_Maneuver& maneuver, pbnavitia::PtObject* o) {
     auto uri = std::stringstream();
     uri << std::fixed << std::setprecision(5) << geo_point.lng() << ";" << geo_point.lat();
     o->set_uri(uri.str());
-    o->set_name("");
-    auto* coords = o->mutable_address()->mutable_coord();
+
+    auto* address = o->mutable_address();
+    auto* coords = address->mutable_coord();
     coords->set_lat(geo_point.lat());
     coords->set_lon(geo_point.lng());
     o->set_embedded_type(pbnavitia::ADDRESS);
+
+    if (!maneuver.street_name().empty() && maneuver.street_name().Get(0).has_value()) {
+        o->set_name(maneuver.street_name().Get(0).value());
+        address->set_name(maneuver.street_name().Get(0).value());
+        address->set_label(maneuver.street_name().Get(0).value());
+    } else {
+        // this line is compulsory beacuse "name" is required.
+        o->set_name("");
+    }
 }
 
 void compute_geojson(const std::vector<midgard::PointLL>& list_geo_points, pbnavitia::Section& s) {
