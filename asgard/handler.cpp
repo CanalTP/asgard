@@ -58,6 +58,7 @@ static const std::unordered_map<std::string, float> MAX_MATRIX_DISTANCE = {{"wal
                                                                            {"taxi", 500000}};
 
 // Default value set by Navitia
+// in m/s 
 static const std::unordered_map<std::string, float> MAX_SPEED = {{"walking", 4},
                                                                  {"bike", 15},
                                                                  {"car", 50},
