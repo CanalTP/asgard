@@ -45,6 +45,25 @@ using ProjectedLocations = std::unordered_map<midgard::PointLL, valhalla::baldr:
 constexpr size_t MAX_MASK_SIZE = 10000;
 using ProjectionFailedMask = std::bitset<MAX_MASK_SIZE>;
 
+static const std::unordered_map<std::string, float> TIMECOST_DIVISOR = {{"walking", thor::kTimeDistCostThresholdPedestrianDivisor},
+                                                                        {"bike", thor::kTimeDistCostThresholdBicycleDivisor},
+                                                                        {"car", thor::kTimeDistCostThresholdAutoDivisor},
+                                                                        {"taxi", thor::kTimeDistCostThresholdAutoDivisor}};
+
+// MAX_MATRIX_Distance value set by Valhalla
+// in meters
+static const std::unordered_map<std::string, float> MAX_MATRIX_DISTANCE = {{"walking", 200000},
+                                                                           {"bike", 200000},
+                                                                           {"car", 500000},
+                                                                           {"taxi", 500000}};
+
+// Default value set by Navitia
+// in m/s
+static const std::unordered_map<std::string, float> MAX_SPEED = {{"walking", 4},
+                                                                 {"bike", 15},
+                                                                 {"car", 50},
+                                                                 {"taxi", 50}};
+
 namespace {
 
 pbnavitia::Response make_error_response(pbnavitia::Error_error_id err_id, const std::string& err_msg) {
@@ -57,16 +76,25 @@ pbnavitia::Response make_error_response(pbnavitia::Error_error_id err_id, const 
 }
 
 float get_distance(const std::string& mode, float duration) {
-    using namespace thor;
-    if (mode == "walking") {
-        return duration * kTimeDistCostThresholdPedestrianDivisor;
+    if (duration < 0) {
+        throw std::runtime_error("Matrix max duration is negative");
     }
-    if (mode == "bike" || mode == "bss") {
-        return duration * kTimeDistCostThresholdBicycleDivisor;
+    float max_distance = duration * TIMECOST_DIVISOR.at(mode);
+    if (max_distance > MAX_MATRIX_DISTANCE.at(mode)) {
+        LOG_ERROR(std::string("Matrix distance for mode ") + mode + " is too large, we have to clamp it");
+        return MAX_MATRIX_DISTANCE.at(mode);
     }
-    return duration * kTimeDistCostThresholdAutoDivisor;
+    return max_distance;
 }
 
+void clamp_speed(ModeCostingArgs& args) {
+    for (const auto& mode : {"walking", "bike", "car", "taxi"}) {
+        if (args.speeds[util::convert_navitia_to_valhalla_costing(mode)] > MAX_SPEED.at(mode)) {
+            LOG_ERROR(std::string("Speed for mode ") + mode + " is too large, we have to clamp it");
+            args.speeds[util::convert_navitia_to_valhalla_costing(mode)] = MAX_SPEED.at(mode);
+        }
+    }
+}
 ModeCostingArgs
 make_modecosting_args(const pbnavitia::DirectPathRequest& request) {
     ModeCostingArgs args{};
@@ -79,10 +107,13 @@ make_modecosting_args(const pbnavitia::DirectPathRequest& request) {
     args.speeds[util::convert_navitia_to_valhalla_costing("car")] = request_params.car_speed();
     args.speeds[util::convert_navitia_to_valhalla_costing("taxi")] = request_params.car_no_park_speed();
 
+    clamp_speed(args);
+
     args.bss_rent_duration = request_params.bss_rent_duration();
     args.bss_rent_penalty = request_params.bss_rent_penalty();
     args.bss_return_duration = request_params.bss_return_duration();
     args.bss_return_penalty = request_params.bss_return_penalty();
+
     return args;
 }
 
@@ -92,29 +123,20 @@ make_modecosting_args(const pbnavitia::StreetNetworkRoutingMatrixRequest& reques
 
     args.mode = request.mode();
 
-    if (request.has_streetnetwork_params()) {
-        auto const& request_params = request.streetnetwork_params();
+    auto const& request_params = request.streetnetwork_params();
 
-        args.speeds[util::convert_navitia_to_valhalla_costing("walking")] = request_params.walking_speed();
-        args.speeds[util::convert_navitia_to_valhalla_costing("bike")] = request_params.bike_speed();
-        args.speeds[util::convert_navitia_to_valhalla_costing("car")] = request_params.car_speed();
-        args.speeds[util::convert_navitia_to_valhalla_costing("taxi")] = request_params.car_no_park_speed();
+    args.speeds[util::convert_navitia_to_valhalla_costing("walking")] = request_params.walking_speed();
+    args.speeds[util::convert_navitia_to_valhalla_costing("bike")] = request_params.bike_speed();
+    args.speeds[util::convert_navitia_to_valhalla_costing("car")] = request_params.car_speed();
+    args.speeds[util::convert_navitia_to_valhalla_costing("taxi")] = request_params.car_no_park_speed();
 
-        args.bss_rent_duration = request_params.bss_rent_duration();
-        args.bss_rent_penalty = request_params.bss_rent_penalty();
-        args.bss_return_duration = request_params.bss_return_duration();
-        args.bss_return_penalty = request_params.bss_return_penalty();
+    clamp_speed(args);
 
-    } else if (request.has_speed()) {
-        // We still need this for Backward compatibility
-        // TODO: remove this when jormun is updated
-        if (request.mode() == "bss") {
-            args.speeds[util::convert_navitia_to_valhalla_costing("bike")] = request.speed();
-            args.speeds[util::convert_navitia_to_valhalla_costing("walking")] = request.speed() / 3.66;
-        } else {
-            args.speeds[util::convert_navitia_to_valhalla_costing(request.mode())] = request.speed();
-        }
-    }
+    args.bss_rent_duration = request_params.bss_rent_duration();
+    args.bss_rent_penalty = request_params.bss_rent_penalty();
+    args.bss_return_duration = request_params.bss_return_duration();
+    args.bss_return_penalty = request_params.bss_return_penalty();
+
     return args;
 }
 
