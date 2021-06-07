@@ -51,6 +51,7 @@ static const std::unordered_map<std::string, float> TIMECOST_DIVISOR = {{"walkin
                                                                         {"taxi", thor::kTimeDistCostThresholdAutoDivisor}};
 
 // MAX_MATRIX_Distance value set by Valhalla
+// in meters
 static const std::unordered_map<std::string, float> MAX_MATRIX_DISTANCE = {{"walking", 200000},
                                                                            {"bike", 200000},
                                                                            {"car", 500000},
