@@ -110,18 +110,27 @@ BOOST_AUTO_TEST_CASE(set_extremity_pt_object_test) {
     {
         pbnavitia::Section section;
 
-        set_extremity_pt_object(list_geo_points.front(), section.mutable_origin());
-        set_extremity_pt_object(list_geo_points.back(), section.mutable_destination());
+        DirectionsLeg_Maneuver maneuver;
+
+        auto* street_name = maneuver.add_street_name();
+        street_name->set_value("Navitia 42");
+
+        set_extremity_pt_object(list_geo_points.front(), maneuver, section.mutable_origin());
+        set_extremity_pt_object(list_geo_points.back(), maneuver, section.mutable_destination());
 
         BOOST_CHECK_EQUAL(section.origin().uri(), "50.12346;1.45763");
-        BOOST_CHECK_EQUAL(section.origin().name(), "");
+        BOOST_CHECK_EQUAL(section.origin().name(), "Navitia 42");
         BOOST_CHECK_EQUAL(section.origin().address().coord().lon(), 50.12345678f);
         BOOST_CHECK_EQUAL(section.origin().address().coord().lat(), 1.457634f);
+        BOOST_CHECK_EQUAL(section.origin().address().label(), "Navitia 42");
+        BOOST_CHECK_EQUAL(section.origin().address().name(), "Navitia 42");
 
         BOOST_CHECK_EQUAL(section.destination().uri(), "42.07947;7.97482");
-        BOOST_CHECK_EQUAL(section.destination().name(), "");
+        BOOST_CHECK_EQUAL(section.destination().name(), "Navitia 42");
         BOOST_CHECK_EQUAL(section.destination().address().coord().lon(), 42.0794687f);
         BOOST_CHECK_EQUAL(section.destination().address().coord().lat(), 7.974815640f);
+        BOOST_CHECK_EQUAL(section.destination().address().label(), "Navitia 42");
+        BOOST_CHECK_EQUAL(section.destination().address().name(), "Navitia 42");
     }
 }
 

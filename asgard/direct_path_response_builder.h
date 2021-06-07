@@ -35,7 +35,7 @@ pbnavitia::Response build_journey_response(const pbnavitia::Request& request,
 
 using ConstManeuverItetator = google::protobuf::RepeatedPtrField<valhalla::DirectionsLeg_Maneuver>::const_iterator;
 
-void set_extremity_pt_object(const valhalla::midgard::PointLL& geo_point, pbnavitia::PtObject* o);
+void set_extremity_pt_object(const valhalla::midgard::PointLL& geo_point, const valhalla::DirectionsLeg_Maneuver& maneuver, pbnavitia::PtObject* o);
 void compute_metadata(pbnavitia::Journey& pb_journey);
 void compute_geojson(const std::vector<valhalla::midgard::PointLL>& list_geo_points, pbnavitia::Section& s);
 void compute_path_items(valhalla::Api& api,
