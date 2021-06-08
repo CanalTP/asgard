@@ -325,5 +325,34 @@ BOOST_AUTO_TEST_CASE(set_path_item_duration_test) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(set_path_item_instruction_start_coords_test) {
+    // No value set in path_item
+    {
+        auto instruction_start_coords = midgard::PointLL();
+        auto path_item = pbnavitia::PathItem();
+
+        set_path_item_instruction_start_coords(path_item, instruction_start_coords);
+        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinates(), false);
+    }
+
+    // One value set in path_item
+    {
+        DirectionsLeg_Maneuver maneuver;
+        std::string instruction;
+        auto instruction_start_coords = midgard::PointLL();
+        instruction_start_coords.set_x(2.347749f);
+        instruction_start_coords.set_y(48.647623f);
+        auto path_item = pbnavitia::PathItem();
+
+        maneuver.set_text_instruction("Walk east on Avenue de l'Escadrille Normandie-Niemen. Keep going for 35 m.");
+        set_path_item_instruction(maneuver, path_item, true);
+
+        set_path_item_instruction_start_coords(path_item, instruction_start_coords);
+        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinates(), true);
+        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinates().lat(), 48.647623f);
+        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinates().lon(), 2.347749f);
+    }
+}
+
 } // namespace direct_path_response_builder
 } // namespace asgard
