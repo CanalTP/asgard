@@ -68,7 +68,9 @@ Metrics::Metrics(const boost::optional<const AsgardConf&>& config) {
     const std::map<std::string, std::string> infos = {
         {"version", std::string(config::project_version)},
         {"build_type", std::string(config::asgard_build_type)},
-        {"max_cache_size", std::to_string(conf.cache_size)},
+        {"max_walking_cache_size", std::to_string(conf.cache_size.at("walking"))},
+        {"max_bike_cache_size", std::to_string(conf.cache_size.at("bike"))},
+        {"max_car_cache_size", std::to_string(conf.cache_size.at("car"))},
         {"nb_threads", std::to_string(conf.nb_threads)},
         {"reachability", std::to_string(conf.reachability)},
         {"radius", std::to_string(conf.radius)}};
@@ -104,23 +106,25 @@ Metrics::Metrics(const boost::optional<const AsgardConf&>& config) {
         this->handle_matrix_histogram[mode] = &histo_matrix;
     }
 
-    nb_cache_miss_gauge = &prometheus::BuildGauge()
-                               .Name("nb_cache_miss")
-                               .Help("Nb of projector's cache miss from the start of app")
-                               .Register(*registry)
-                               .Add({});
+    for (auto const& mode : {"walking", "bike", "car"}) {
+        nb_cache_miss_gauge[mode] = &prometheus::BuildGauge()
+                                         .Name(std::string("nb_cache_miss_") + mode)
+                                         .Help(std::string("Nb of projector's cache[") + mode + std::string("] miss from the start of app"))
+                                         .Register(*registry)
+                                         .Add({});
 
-    nb_cache_call_gauge = &prometheus::BuildGauge()
-                               .Name("nb_cache_calls")
-                               .Help("Nb of projector's cache calls from the start of app")
-                               .Register(*registry)
-                               .Add({});
+        nb_cache_call_gauge[mode] = &prometheus::BuildGauge()
+                                         .Name(std::string("nb_cache_calls_") + mode)
+                                         .Help(std::string("Nb of projector's cache[") + mode + std::string("] calls from the start of app"))
+                                         .Register(*registry)
+                                         .Add({});
 
-    current_cache_size = &prometheus::BuildGauge()
-                              .Name("cache_size")
-                              .Help("current cache size")
-                              .Register(*registry)
-                              .Add({});
+        current_cache_size[mode] = &prometheus::BuildGauge()
+                                        .Name(std::string("cache_size_") + mode)
+                                        .Help(std::string("current cache[") + mode + std::string("]size"))
+                                        .Register(*registry)
+                                        .Add({});
+    }
 }
 
 InFlightGuard Metrics::start_in_flight() const {
@@ -154,19 +158,19 @@ void Metrics::observe_handle_matrix(const std::string& mode, double duration) co
     }
 }
 
-void Metrics::observe_nb_cache_miss(uint64_t nb_cache_miss, uint64_t nb_cache_calls) const {
+void Metrics::observe_nb_cache_miss(const std::string& mode, uint64_t nb_cache_miss, uint64_t nb_cache_calls) const {
     if (!registry) {
         return;
     }
-    nb_cache_miss_gauge->Set(nb_cache_miss);
-    nb_cache_call_gauge->Set(nb_cache_calls);
+    nb_cache_miss_gauge.at(mode)->Set(nb_cache_miss);
+    nb_cache_call_gauge.at(mode)->Set(nb_cache_calls);
 }
 
-void Metrics::observe_cache_size(uint64_t cache_size) const {
+void Metrics::observe_cache_size(const std::string& mode, uint64_t cache_size) const {
     if (!registry) {
         return;
     }
-    current_cache_size->Set(cache_size);
+    current_cache_size.at(mode)->Set(cache_size);
 }
 
 } // namespace asgard

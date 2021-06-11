@@ -26,8 +26,6 @@ Options make_default_directions_options(const std::string& mode) {
 Options make_costing_option(const ModeCostingArgs& args) {
 
     Options options = make_default_directions_options(args.mode);
-    options.mutable_costing_options(vc::auto_)->set_top_speed(args.speeds[vc::auto_] * 3.6);
-    options.mutable_costing_options(vc::taxi)->set_top_speed(args.speeds[vc::taxi] * 3.6);
 
     options.mutable_costing_options(vc::bicycle)->set_cycling_speed(args.speeds[vc::bicycle] * 3.6);
     options.mutable_costing_options(vc::pedestrian)->set_walking_speed(args.speeds[vc::pedestrian] * 3.6);
