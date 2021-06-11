@@ -58,6 +58,8 @@ BOOST_AUTO_TEST_CASE(handle_matrix_test) {
     request.set_requested_api(pbnavitia::street_network_routing_matrix);
     auto* sn_request = request.mutable_sn_routing_matrix();
 
+    auto* request_params = sn_request->mutable_streetnetwork_params();
+
     add_origin_or_dest_to_request(sn_request->add_origins(),
                                   make_string_from_point(maker.get_all_points().front()));
 
@@ -67,7 +69,8 @@ BOOST_AUTO_TEST_CASE(handle_matrix_test) {
 
     sn_request->set_mode("walking");
     sn_request->set_max_duration(100000);
-    sn_request->set_speed(2);
+
+    request_params->set_walking_speed(2);
 
     const auto response = h.handle(request);
 

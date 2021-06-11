@@ -22,9 +22,9 @@
 #include <valhalla/baldr/graphreader.h>
 #include <valhalla/thor/astar_bss.h>
 #include <valhalla/thor/bidirectional_astar.h>
-#include <valhalla/thor/timedep.h>
 #include <valhalla/thor/timedistancebssmatrix.h>
 #include <valhalla/thor/timedistancematrix.h>
+#include <valhalla/thor/unidirectional_astar.h>
 
 namespace pbnavitia {
 class Request;
@@ -47,6 +47,15 @@ private:
     valhalla::thor::PathAlgorithm& get_path_algorithm(const valhalla::Location& origin,
                                                       const valhalla::Location& destination,
                                                       const std::string& mode);
+
+    void clear() {
+        if (graph.OverCommitted()) { graph.Clear(); }
+        matrix.Clear();
+        bss_matrix.Clear();
+        bss_astar.Clear();
+        bda.Clear();
+        timedep_forward.Clear();
+    };
 
     valhalla::baldr::GraphReader& graph;
     valhalla::thor::TimeDistanceMatrix matrix;
