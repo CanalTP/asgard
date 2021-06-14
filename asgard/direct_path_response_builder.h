@@ -50,7 +50,7 @@ void set_path_item_type(const valhalla::TripLeg_Edge& edge, pbnavitia::PathItem&
 void set_path_item_duration(const valhalla::DirectionsLeg_Maneuver& maneuver, pbnavitia::PathItem& path_item);
 void set_path_item_direction(const valhalla::DirectionsLeg_Maneuver& maneuver, pbnavitia::PathItem& path_item);
 void set_path_item_instruction(const valhalla::DirectionsLeg_Maneuver& maneuver, pbnavitia::PathItem& path_item, const bool is_last_maneuver);
-void set_path_item_instruction_start_coords(pbnavitia::PathItem& path_item, const valhalla::midgard::PointLL& instruction_start_coords);
+void set_path_item_instruction_start_coord(pbnavitia::PathItem& path_item, const valhalla::midgard::PointLL& instruction_start_coord);
 
 } // namespace direct_path_response_builder
 } // namespace asgard
