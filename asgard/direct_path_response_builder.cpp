@@ -548,7 +548,7 @@ void set_path_item_instruction(const DirectionsLeg_Maneuver& maneuver, pbnavitia
 void set_path_item_instruction_start_coords(pbnavitia::PathItem& path_item, const valhalla::midgard::PointLL& instruction_start_coords) {
     if (path_item.instruction().empty()) { return; }
 
-    auto* coords = path_item.mutable_instruction_start_coordinates();
+    auto* coords = path_item.mutable_instruction_start_coordinate();
     coords->set_lat(instruction_start_coords.lat());
     coords->set_lon(instruction_start_coords.lng());
 }

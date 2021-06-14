@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(set_path_item_instruction_start_coords_test) {
         auto path_item = pbnavitia::PathItem();
 
         set_path_item_instruction_start_coords(path_item, instruction_start_coords);
-        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinates(), false);
+        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinate(), false);
     }
 
     // One value set in path_item
@@ -357,9 +357,9 @@ BOOST_AUTO_TEST_CASE(set_path_item_instruction_start_coords_test) {
         set_path_item_instruction(maneuver, path_item, true);
 
         set_path_item_instruction_start_coords(path_item, instruction_start_coords);
-        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinates(), true);
-        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinates().lat(), 48.647623f);
-        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinates().lon(), 2.347749f);
+        BOOST_CHECK_EQUAL(path_item.has_instruction_start_coordinate(), true);
+        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinate().lat(), 48.647623f);
+        BOOST_CHECK_EQUAL(path_item.instruction_start_coordinate().lon(), 2.347749f);
     }
 }
 
