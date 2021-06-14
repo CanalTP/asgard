@@ -520,7 +520,7 @@ void compute_path_items(valhalla::Api& api,
         auto const& edge = trip_route.mutable_legs(0)->node(maneuver.begin_path_index()).edge();
 
         auto shape_begin_idx = it->begin_shape_index();
-        auto instruction_start_coords = shape[shape_begin_idx];
+        const auto& instruction_start_coords = shape[shape_begin_idx];
 
         set_path_item_type(edge, *path_item);
         set_path_item_name(maneuver, *path_item);
