@@ -17,10 +17,10 @@ pipeline {
                 sh "make build-app-image-${branch_name} TAG=`make get-app-${params.branch_name}-tag`"
             }
         }
-        stage('Login') {
+        stage('Docker Login') {
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'kisio-docker-token', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    sh "make dockerhub-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD}"
+                withCredentials([usernamePassword(credentialsId: 'core-ci-registry-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD'])) {
+                    sh "make dockerhub-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD} REGISTRY_HOST=${params.registry_intern}"
                 }
             }
         }

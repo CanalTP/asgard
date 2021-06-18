@@ -25,9 +25,9 @@ build-deps-image: ## Build Asgard deps image
 	$(info Building Asgard app image from master)
 	docker build -f docker/asgard-build-deps/Dockerfile -t navitia/asgard-build-deps:${TAG} . --no-cache
 
-dockerhub-login: ## Login Docker hub, DOCKERHUB_USER, DOCKERHUB_PWD, must be provided
-	$(info Login Dockerhub)
-	echo ${DOCKERHUB_PWD} | docker login --username ${DOCKERHUB_USER} --password-stdin
+dockerhub-login: ## Login Docker, DOCKERHUB_USER, DOCKERHUB_PWD, REGISTRY_HOST must be provided
+	$(info Login Docker)
+	echo ${DOCKERHUB_PWD} | docker login --username ${DOCKERHUB_USER} --password-stdin ${REGISTRY_HOST}
 
 get-app-master-tag: ## Get master tag
 	@echo "master"
