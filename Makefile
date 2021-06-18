@@ -17,6 +17,10 @@ build-app-image-release: ## Build Asgard app image from release
 	$(info Building Asgard app image from release)
 	docker build -f docker/asgard-app/Dockerfile -t navitia/asgard-app:${TAG} . --no-cache
 
+build-app-image-jenkins_registry_intern: ## Build Asgard app image from jenkins_registry_intern
+	$(info Building Asgard app image from jenkins_registry_intern)
+	docker build -f docker/asgard-app/Dockerfile -t navitia/asgard-app:${TAG} . --no-cache
+
 build-deps-image: ## Build Asgard deps image
 	$(info Building Asgard app image from master)
 	docker build -f docker/asgard-build-deps/Dockerfile -t navitia/asgard-build-deps:${TAG} . --no-cache
@@ -30,6 +34,9 @@ get-app-master-tag: ## Get master tag
 
 get-app-release-tag: ## Get release version tag
 	@[ -z "${TAG}" ] && (git describe --tags --abbrev=0 && exit 0) || echo ${TAG}
+
+get-app-jenkins_registry_intern-tag: ## Get jenkins_registry_intern tag
+	@echo "jenkins_registry_intern"
 
 remove-build-deps-image: ## Remove navitia/asgard-build-deps if existent
 	$(info Remove navitia/asgard-build-deps)
