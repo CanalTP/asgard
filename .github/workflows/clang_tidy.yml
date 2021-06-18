@@ -29,10 +29,14 @@ jobs:
       run: apt update && apt install -y clang-tidy-10
 
     - name : Cmake prepare
-      run: cp -r /libvalhalla . && cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      run: cp -r /libvalhalla . && mkdir build && cd build && cmake ./.. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     - name: Clang-tidy
-      run: python /usr/bin/run-clang-tidy-10.py -header-filter='./asgard/*' -format -fix || echo "Files have been tidied ! Let's commit them"
+      run: python /usr/bin/run-clang-tidy-10.py -header-filter='./asgard/*' -format -fix -p build || echo "Files have been tidied ! Let's commit them"
+
+    # To avoid any error with git when creating PR 
+    - name: Remove folder libvalhalla 
+      run: rm -rf libvalhalla 
 
     - name: Commit and push changes
       uses: peter-evans/create-pull-request@v3
