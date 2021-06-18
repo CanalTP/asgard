@@ -41,7 +41,6 @@ pipeline {
         }
 	stage('Push Asgard App Image to Intern') {
 	    steps {
-		sh 'echo "registry_intern: ${params.registry_intern}"'
 		sh 'echo "Push docker with tag:" ${params.registry_intern}'
 		sh "make push-app-image-intern TAG=`make get-app-${branch_name}-tag` REGISTRY_HOST=${params.registry_intern}"
 	    }
