@@ -50,6 +50,7 @@ jobs:
 
     - name: SonarCloud Scan
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
           sonar-scanner-4.6.0.2311-linux/bin/sonar-scanner \
