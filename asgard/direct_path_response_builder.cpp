@@ -511,11 +511,16 @@ void compute_path_items(valhalla::Api& api,
 
     auto& trip_route = *api.mutable_trip()->mutable_routes(0);
     auto& directions_leg = *api.mutable_directions()->mutable_routes(0)->mutable_legs(0);
+    auto& trip_leg = *api.mutable_trip()->mutable_routes(0)->mutable_legs(0);
+    const auto shape = midgard::decode<std::vector<midgard::PointLL>>(trip_leg.shape());
 
     for (auto it = begin_maneuver; it < end_maneuver; ++it) {
         const auto& maneuver = *it;
         auto* path_item = sn->add_path_items();
         auto const& edge = trip_route.mutable_legs(0)->node(maneuver.begin_path_index()).edge();
+
+        auto shape_begin_idx = it->begin_shape_index();
+        const auto& instruction_start_coord = shape[shape_begin_idx];
 
         set_path_item_type(edge, *path_item);
         set_path_item_name(maneuver, *path_item);
@@ -525,6 +530,7 @@ void compute_path_items(valhalla::Api& api,
         if (enable_instruction) {
             bool is_last_maneuver = std::distance(it, directions_leg.maneuver().end()) == 1;
             set_path_item_instruction(maneuver, *path_item, is_last_maneuver);
+            set_path_item_instruction_start_coord(*path_item, instruction_start_coord);
         }
     }
 }
@@ -537,6 +543,14 @@ void set_path_item_instruction(const DirectionsLeg_Maneuver& maneuver, pbnavitia
         }
         path_item.set_instruction(instruction);
     }
+}
+
+void set_path_item_instruction_start_coord(pbnavitia::PathItem& path_item, const valhalla::midgard::PointLL& instruction_start_coord) {
+    if (path_item.instruction().empty()) { return; }
+
+    auto* coord = path_item.mutable_instruction_start_coordinate();
+    coord->set_lat(instruction_start_coord.lat());
+    coord->set_lon(instruction_start_coord.lng());
 }
 
 void set_path_item_name(const DirectionsLeg_Maneuver& maneuver, pbnavitia::PathItem& path_item) {
