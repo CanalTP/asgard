@@ -1,0 +1,64 @@
+name: Clang-tidy
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  info:
+    runs-on: ubuntu-latest
+        
+    steps:
+    - name : Dump Github Context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo $GITHUB_CONTEXT
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    container:
+        image: navitia/asgard-build-deps:latest
+        
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: 'recursive'
+
+    - name : Install dependencies
+      run: apt update && apt install -y clang-tidy-10
+
+    - name : Cmake prepare
+      run: cp -r /libvalhalla . && mkdir build && cd build && cmake ./.. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Clang-tidy
+      run: python /usr/bin/run-clang-tidy-10.py -header-filter='./asgard/*' -format -fix -p build || echo "Files have been tidied ! Let's commit them"
+
+    # To avoid any error with git when creating PR 
+    - name: Remove folder libvalhalla 
+      run: rm -rf libvalhalla 
+
+    - name: Commit and push changes
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Clang-tidy the code base
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        title: '[Clang-Tidy] Code maintenance and modernisation'
+        body: |
+          🤖 This is an automatic PR 🤖
+
+          Clang-tidy suggests the following changes so far:
+          - `clang-analyzer-*` : clang Static Analyzer checks.
+
+          [#clang-tidy documentation](https://clang.llvm.org/extra/clang-tidy/)
+        labels: not_in_changelog
+        team-reviewers: CanalTP/coreteam
+        branch: auto/clang-tidy
+
+    - name: Check outputs
+      run: |
+        echo "Pull Request Number - ${{ env.PULL_REQUEST_NUMBER }}"
+        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+
