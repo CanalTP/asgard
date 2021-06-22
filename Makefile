@@ -48,7 +48,7 @@ push-app-image: ## Push app-image to dockerhub
 
 push-app-image-intern: ## Push app-image to intern
 	$(info Push app-image to intern: ${REGISTRY_HOST})
-	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-app:${TAG} ${REGISTRY_HOST}/navitia/asgard-app:${TAG} && docker push ${REGISTRY_HOST}/navitia/asgard-app:${TAG} || echo "REGISTRY_HOST is empty"
+	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-app:${TAG} ${REGISTRY_HOST}/asgard-app:${TAG} && docker push ${REGISTRY_HOST}/asgard-app:${TAG} || echo "REGISTRY_HOST is empty"
 
 push-deps-image: ## Push deps-image to dockerhub
 	$(info Push deps-image to Dockerhub)
