@@ -17,15 +17,9 @@ private:
     friend class UnitTestProjector;
 
     typedef std::pair<valhalla::midgard::PointLL, std::string> key_type;
-    typedef valhalla::baldr::PathLocation mapped_type;
-    typedef std::pair<const key_type, mapped_type> value_type;
-    typedef boost::multi_index_container<
-        value_type,
-        boost::multi_index::indexed_by<
-            boost::multi_index::sequenced<>,
-            boost::multi_index::hashed_unique<
-                boost::multi_index::member<value_type, const key_type, &value_type::first>>>>
-        Cache;
+    using mapped_type = valhalla::baldr::PathLocation;
+    using value_type = std::pair<const key_type, mapped_type>;
+    using Cache = boost::multi_index_container<value_type, boost::multi_index::indexed_by<boost::multi_index::sequenced<>, boost::multi_index::hashed_unique<boost::multi_index::member<value_type, const key_type, &value_type::first>>>>;
 
     // maximal cached values
     std::unordered_map<std::string, size_t> cache_size_;
