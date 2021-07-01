@@ -42,11 +42,7 @@ remove-build-deps-image: ## Remove navitia/asgard-build-deps if existent
 	$(info Remove navitia/asgard-build-deps)
 	docker rmi -f navitia/asgard-build-deps:latest || true    
 
-push-app-image: ## Push app-image to dockerhub
-	$(info Push app-image to Dockerhub)
-	docker push navitia/asgard-app:${TAG}
-
-push-app-image-intern: ## Push app-image to intern
+push-app-image: ## Push app-image to intern
 	$(info Push app-image to intern: ${REGISTRY_HOST})
 	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-app:${TAG} ${REGISTRY_HOST}/navitia/asgard-app:${TAG} && docker push ${REGISTRY_HOST}/navitia/asgard-app:${TAG} || echo "REGISTRY_HOST is empty"
 
@@ -55,8 +51,8 @@ push-deps-image: ## Push deps-image to dockerhub
 	docker push navitia/asgard-build-deps:${TAG}
 
 push-data-image: ## Push data-image to dockerhub, TAG must be provided 
-	$(info Push data-image to Dockerhub)
-	docker push navitia/asgard-data:${TAG}
+	$(info Push data-image to intern: ${REGISTRY_HOST})
+	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-data:${TAG} ${REGISTRY_HOST}/navitia/asgard-data:${TAG} && docker push ${REGISTRY_HOST}/navitia/asgard-data:${TAG} || echo "REGISTRY_HOST is empty"
 
 wipe-useless-images: ## Remove all useless images
 	$(info Remove useless images)

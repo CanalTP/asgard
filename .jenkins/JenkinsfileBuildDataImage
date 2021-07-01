@@ -5,6 +5,7 @@ pipeline {
         string(name: 'PBF_URL', defaultValue: 'https://download.geofabrik.de/europe/france-latest.osm.pbf', description: 'osm pbf url')
         string(name: 'DATA_IMAGE_TAG', defaultValue : 'france', description: 'data image tag')
         string(name: 'ELEVATION_BBOX', defaultValue : '-5.1972 8.3483 42.2646 51.1116', description: 'elevation bounding box, default value is for france')
+	string(name: 'registry_intern', defaultValue: 'docker-registry.canaltp.fr', description: 'registry intern')
     }
     stages {
         stage('Remove navitia/asgard-build-deps images') {
@@ -19,18 +20,17 @@ pipeline {
                 sh "make build-data-image TAG=${DATA_IMAGE_TAG} PBF_URL=${PBF_URL} BBOX='${ELEVATION_BBOX}'" 
             }
         }
-        stage('Log in') {
+	stage('Docker Login') {
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'kisio-docker-token', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    sh 'echo "login to dockerHub"'
-                    sh "make dockerhub-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD}"
+                withCredentials([usernamePassword(credentialsId: 'core-ci-registry-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "make docker-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD} REGISTRY_HOST=${params.registry_intern}"
                 }
             }
         }
-        stage('Push Asgard Data Image') {
+        stage('Push Asgard Data Image to Intern') {
             steps {
-                sh 'echo "Push on dockerHub with tag:" ${DATA_IMAGE_TAG}'
-                sh "make push-data-image TAG=${DATA_IMAGE_TAG}"
+                sh 'echo "Push on docker with tag:" ${DATA_IMAGE_TAG}'
+                sh "make push-data-image TAG=${DATA_IMAGE_TAG} REGISTRY_HOST=${params.registry_intern}"
             }
         }
         stage('Remove useless images') {

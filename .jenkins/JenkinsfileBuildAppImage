@@ -33,16 +33,10 @@ pipeline {
                 sh "docker push navitia/asgard-app:latest"
             }
         }
-        stage('Push Asgard App Image') {
-            steps {
-                sh 'echo "Push docker with tag:" ${branch_name}'
-                sh "make push-app-image TAG=`make get-app-${branch_name}-tag`"
-            }
-        }
 	stage('Push Asgard App Image to Intern') {
 	    steps {
 		sh "echo 'Push docker with tag:' \"${params.registry_intern}\""
-		sh "make push-app-image-intern TAG=`make get-app-${branch_name}-tag` REGISTRY_HOST=${params.registry_intern}"
+		sh "make push-app-image TAG=`make get-app-${branch_name}-tag` REGISTRY_HOST=${params.registry_intern}"
 	    }
 	}
         stage('Remove useless images') {
