@@ -17,13 +17,17 @@ build-app-image-release: ## Build Asgard app image from release
 	$(info Building Asgard app image from release)
 	docker build -f docker/asgard-app/Dockerfile -t navitia/asgard-app:${TAG} . --no-cache
 
+build-app-image-jenkins_registry_intern: ## Build Asgard app image from jenkins_registry_intern
+	$(info Building Asgard app image from jenkins_registry_intern)
+	docker build -f docker/asgard-app/Dockerfile -t navitia/asgard-app:${TAG} . --no-cache
+
 build-deps-image: ## Build Asgard deps image
 	$(info Building Asgard app image from master)
 	docker build -f docker/asgard-build-deps/Dockerfile -t navitia/asgard-build-deps:${TAG} . --no-cache
 
-dockerhub-login: ## Login Docker hub, DOCKERHUB_USER, DOCKERHUB_PWD, must be provided
-	$(info Login Dockerhub)
-	echo ${DOCKERHUB_PWD} | docker login --username ${DOCKERHUB_USER} --password-stdin
+docker-login: ## Login Docker, DOCKERHUB_USER, DOCKERHUB_PWD, REGISTRY_HOST must be provided
+	$(info Login Docker)
+	echo ${DOCKERHUB_PWD} | docker login --username ${DOCKERHUB_USER} --password-stdin ${REGISTRY_HOST}
 
 get-app-master-tag: ## Get master tag
 	@echo "master"
@@ -31,21 +35,24 @@ get-app-master-tag: ## Get master tag
 get-app-release-tag: ## Get release version tag
 	@[ -z "${TAG}" ] && (git describe --tags --abbrev=0 && exit 0) || echo ${TAG}
 
+get-app-jenkins_registry_intern-tag: ## Get jenkins_registry_intern tag
+	@echo "jenkins_registry_intern"
+
 remove-build-deps-image: ## Remove navitia/asgard-build-deps if existent
 	$(info Remove navitia/asgard-build-deps)
 	docker rmi -f navitia/asgard-build-deps:latest || true    
 
-push-app-image: ## Push app-image to dockerhub
-	$(info Push app-image to Dockerhub)
-	docker push navitia/asgard-app:${TAG}
+push-app-image: ## Push app-image to intern
+	$(info Push app-image to intern: ${REGISTRY_HOST})
+	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-app:${TAG} ${REGISTRY_HOST}/navitia/asgard-app:${TAG} && docker push ${REGISTRY_HOST}/navitia/asgard-app:${TAG} || echo "REGISTRY_HOST is empty"
 
 push-deps-image: ## Push deps-image to dockerhub
 	$(info Push deps-image to Dockerhub)
 	docker push navitia/asgard-build-deps:${TAG}
 
 push-data-image: ## Push data-image to dockerhub, TAG must be provided 
-	$(info Push data-image to Dockerhub)
-	docker push navitia/asgard-data:${TAG}
+	$(info Push data-image to intern: ${REGISTRY_HOST})
+	[ "${REGISTRY_HOST}" ] && docker tag navitia/asgard-data:${TAG} ${REGISTRY_HOST}/navitia/asgard-data:${TAG} && docker push ${REGISTRY_HOST}/navitia/asgard-data:${TAG} || echo "REGISTRY_HOST is empty"
 
 wipe-useless-images: ## Remove all useless images
 	$(info Remove useless images)

@@ -4,7 +4,7 @@
 # Remove Asgard images
 # ********************************
 echo "Remove Asgard images"
-asgard_images=$(docker images "navitia/asgard-*" -q)
+asgard_images=$(docker images "*navitia/asgard-*" -q)
 if [ -z "$asgard_images" ]
 then
     echo "Asgard images don't exist"

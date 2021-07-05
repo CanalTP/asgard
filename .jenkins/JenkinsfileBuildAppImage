@@ -2,6 +2,7 @@ pipeline {
     agent any
     parameters { 
         string(name: 'branch_name', defaultValue: 'master', description: 'branch name')
+        string(name: 'registry_intern', defaultValue: 'docker-registry.canaltp.fr', description: 'registry intern')
     }
     stages {
         stage('Remove navitia/asgard-build-deps images') {
@@ -16,10 +17,10 @@ pipeline {
                 sh "make build-app-image-${branch_name} TAG=`make get-app-${params.branch_name}-tag`"
             }
         }
-        stage('Login') {
+        stage('Docker Login') {
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'kisio-docker-token', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    sh "make dockerhub-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD}"
+                withCredentials([usernamePassword(credentialsId: 'core-ci-registry-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "make docker-login DOCKERHUB_USER=${USERNAME} DOCKERHUB_PWD=${PASSWORD} REGISTRY_HOST=${params.registry_intern}"
                 }
             }
         }
@@ -32,12 +33,12 @@ pipeline {
                 sh "docker push navitia/asgard-app:latest"
             }
         }
-        stage('Push Asgard App Image') {
-            steps {
-                sh 'echo "Push docker with tag:" ${branch_name}'
-                sh "make push-app-image TAG=`make get-app-${branch_name}-tag`"
-            }
-        }
+	stage('Push Asgard App Image to Intern') {
+	    steps {
+		sh "echo 'Push docker with tag:' \"${params.registry_intern}\""
+		sh "make push-app-image TAG=`make get-app-${branch_name}-tag` REGISTRY_HOST=${params.registry_intern}"
+	    }
+	}
         stage('Remove useless images') {
             steps {
                 sh "make wipe-useless-images"
