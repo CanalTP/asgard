@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    parameters{
+        string(name: 'ENV', defaultValue : 'dev', description: 'deployement environnement')
+        string(name: 'DOCKER_APP_TAG', defaultValue : 'master', description: 'Asgard app tag')
+        string(name: 'DOCKER_DATA_TAG', defaultValue : 'france', description: 'Asgard data tag')
+    }
+    stages {
+        stage('Checkout Fabric Asgard') {
+            steps {
+                dir("fabric"){
+                    git branch: 'master', changelog: false, credentialsId: 'jenkins-core-github-credentials', poll: false, url: 'https://github.com/CanalTP/fab_asgard'
+                }
+            }
+        }
+        stage('Deploy Asgard app and data image') {
+            steps {
+                dir("fabric"){
+                    withEnv(["HOME=${env.WORKSPACE}"]) {
+                        sh "pip install -r requirements.txt --exists-action w"
+                        sh "python -u -m fabric let:app_tag=${params.DOCKER_APP_TAG} let:data_tag=${params.DOCKER_DATA_TAG} --keepalive=20 ${params.ENV} deploy_app_and_data"
+                    }
+                }
+            }
+        }
+        stage('Remove useless images') {
+            steps {
+                sh "make wipe-useless-images"
+            }
+        }
+    }
+    post {
+        always {         
+            deleteDir()
+        }
+    }
+}
+
